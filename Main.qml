@@ -20,27 +20,25 @@ Window {
     TCPServer {
         id: tcpServer
 
-        onServerStatusChanged: status => output.append(status ? {
-                msg: "Server started",
-                time: getTime()
-            } : {
-                msg: "Server stopped",
-                time: getTime()
+        onServerStatusChanged: status => output.append({
+                msg: status ? "Server started" : "Server stopped",
+                time: getTime(),
+                owner: "system"
             })
-        onClientStatusChanged: status => output.append(status ? {
-                msg: "Client connected",
-                time: getTime()
-            } : {
-                msg: "Client disconnected",
-                time: getTime()
+        onClientStatusChanged: status => output.append({
+                msg: status ? "Client connected" : "Client disconnected",
+                time: getTime(),
+                owner: "system"
             })
         onReceived: msg => output.append({
-                msg: "Recieved: " + msg,
-                time: getTime()
+                msg: msg,
+                time: getTime(),
+                owner: "someone"
             })
         onError: err => output.append({
                 msg: "Error: " + err,
-                time: getTime()
+                time: getTime(),
+                owner: "system"
             })
     }
 
@@ -202,15 +200,12 @@ Window {
                 ListElement {
                     msg: ""
                     time: ""
+                    owner: ""
                 }
             }
-            Component {
-                id: outputDelegate
 
-                // Item {
-                // border.width: 2
-                // radius: 5
-                // color: "#1e1e2e"
+            Component {
+                id: systemMsgComp
 
                 Row {
                     TextField {
@@ -229,14 +224,70 @@ Window {
                             color: "transparent"
                         }
                     }
-                    // }
+                }
+            }
+            Component {
+                id: myMsgComp
+
+                Row {
+                    TextField {
+                        text: msg
+                        font.pixelSize: 16
+                        readOnly: true
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
+                    TextField {
+                        text: time
+                        font.pixelSize: 12
+                        readOnly: true
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
+                }
+            }
+            Component {
+                id: othersMsgComp
+
+                Row {
+                    TextField {
+                        text: msg
+                        font.pixelSize: 16
+                        readOnly: true
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
+                    TextField {
+                        text: time
+                        font.pixelSize: 12
+                        readOnly: true
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
+                }
+            }
+
+            Component {
+                id: msgDelegate
+
+                Loader {
+                    property string msg: msg
+                    property string time: time
+
+                    sourceComponent: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
+                    onSourceChanged: console.log("source changed")
                 }
             }
 
             ListView {
                 anchors.fill: parent
                 model: output
-                delegate: outputDelegate
+                delegate: msgDelegate
+                // delegate: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
             }
 
             Button {
@@ -280,7 +331,8 @@ Window {
                     // output.append(addTime("Sent: " + input.text));
                     output.append({
                         msg: input.text,
-                        time: getTime()
+                        time: getTime(),
+                        owner: "system"
                     });
                     input.clear();
                 }
@@ -297,15 +349,11 @@ Window {
     Component.onCompleted: {
         output.append({
             msg: "Application started",
-            time: getTime()
+            time: getTime(),
+            owner: "system"
         });
     }
 
-    function addTime(msg) {
-        var now = new Date();
-        var currentTime = ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2) + ":" + ("0" + now.getSeconds()).slice(-2);
-        return "[" + currentTime + "] " + msg;
-    }
     function getTime() {
         var now = new Date();
         return ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2) + ":" + ("0" + now.getSeconds()).slice(-2);
