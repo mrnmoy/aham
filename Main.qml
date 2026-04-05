@@ -79,7 +79,7 @@ Window {
                 Universal.foreground: "#11111b"
                 text: "Connect"
                 onClicked: {
-                    tcpServer.connect("localhost", parseInt(portInput.text));
+                    tcpServer.connect("localhost", parseInt(port.text));
                 }
                 background: Rectangle {
                     border.width: 2
@@ -98,7 +98,7 @@ Window {
                 Universal.foreground: "#11111b"
                 text: "Start"
                 onClicked: {
-                    tcpServer.start("localhost", parseInt(portInput.text));
+                    tcpServer.start("localhost", parseInt(port.text));
                 }
                 background: Rectangle {
                     border.width: 2
@@ -157,6 +157,7 @@ Window {
                     font.bold: true
                     font.pixelSize: 24
                     color: "#b4befe"
+                    leftPadding: 8
                 }
 
                 Text {
@@ -170,13 +171,13 @@ Window {
 
             RowLayout {
                 TextField {
-                    id: portInput
+                    id: port
                     implicitHeight: parent.height
                     implicitWidth: 96
                     font.pixelSize: 16
                     text: "1234"
                     validator: IntValidator {}
-                    enabled: !tcpServer.isListening
+                    enabled: !tcpServer.isListening && !tcpServer.isConnected
                     background: Rectangle {
                         border.width: 2
                         radius: 5
@@ -190,118 +191,112 @@ Window {
             }
         }
 
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+        Component {
+            id: systemMsgComp
 
-            Component {
-                id: systemMsgComp
+            FlexboxLayout {
+                width: msgList.width
+                justifyContent: FlexboxLayout.JustifyCenter
 
-                Row {
-                    anchors.right: parent.right
-                    // Layout.fillWidth: true
-                    // justifyContent: FlexboxLayout.JustifyEnd
-                    // alignItems: FlexboxLayout.AlignEnd
-
-                    TextField {
-                        text: _msg
-                        font.pixelSize: 16
-                        readOnly: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
+                TextField {
+                    text: _msg
+                    font.pixelSize: 16
+                    readOnly: true
+                    color: "#cdd6f4"
+                    background: Rectangle {
+                        radius: 8
+                        color: "#1e1e2e"
                     }
-                    TextField {
-                        text: _time
-                        font.pixelSize: 12
-                        readOnly: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                    }
-                }
-            }
-            Component {
-                id: myMsgComp
-
-                Row {
-                    TextField {
-                        text: _msg
-                        font.pixelSize: 16
-                        readOnly: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                    }
-                    TextField {
-                        text: _time
-                        font.pixelSize: 12
-                        readOnly: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                    }
-                }
-            }
-            Component {
-                id: othersMsgComp
-
-                Row {
-                    TextField {
-                        text: _msg
-                        font.pixelSize: 16
-                        readOnly: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                    }
-                    TextField {
-                        text: _time
-                        font.pixelSize: 12
-                        readOnly: true
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                    }
-                }
-            }
-
-            ListModel {
-                id: output
-                onCountChanged: msgList.positionViewAtEnd()
-
-                ListElement {
-                    msg: "Some Message"
-                    time: "Some time"
-                    owner: "Some owner"
-                }
-            }
-
-            ListView {
-                id: msgList
-                anchors.fill: parent
-                model: output
-                delegate: Component {
-                    Loader {
-                        id: msgLoader
-                        property string _msg: msg
-                        property string _time: time
-                        sourceComponent: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
-                    }
-                }
-            }
-
-            Button {
-                x: parent.width - 40
-                y: 8
-                icon.color: "#f38ba8"
-                icon.source: "qrc:/bin.png"
-                onClicked: output.clear()
-                background: Rectangle {
-                    color: "transparent"
                 }
             }
         }
+        Component {
+            id: myMsgComp
+
+            FlexboxLayout {
+                width: msgList.width
+                justifyContent: FlexboxLayout.JustifyEnd
+
+                TextField {
+                    text: _msg
+                    font.pixelSize: 16
+                    readOnly: true
+                    color: "#cdd6f4"
+                    background: Rectangle {
+                        radius: 8
+                        color: "#1e1e2e"
+                    }
+                }
+
+                TextField {
+                    text: _time
+                    font.pixelSize: 12
+                    readOnly: true
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+                }
+            }
+        }
+        Component {
+            id: othersMsgComp
+
+            FlexboxLayout {
+                width: msgList.width
+                justifyContent: FlexboxLayout.JustifyStart
+
+                TextField {
+                    text: _msg
+                    font.pixelSize: 16
+                    readOnly: true
+                    color: "#cdd6f4"
+                    background: Rectangle {
+                        radius: 8
+                        color: "#1e1e2e"
+                    }
+                }
+
+                TextField {
+                    text: _time
+                    font.pixelSize: 12
+                    readOnly: true
+                    background: Rectangle {
+                        color: "transparent"
+                    }
+                }
+            }
+        }
+
+        ListModel {
+            id: output
+            onCountChanged: msgList.positionViewAtEnd()
+        }
+
+        ListView {
+            id: msgList
+            model: output
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            layoutDirection: Qt.RightToLeft
+            spacing: 8
+            delegate: Loader {
+                id: msgLoader
+                property string _msg: msg
+                property string _time: time
+                sourceComponent: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
+            }
+        }
+
+        // Button {
+        //     x: parent.width - 40
+        //     y: 8
+        //     icon.color: "#f38ba8"
+        //     icon.source: "qrc:/bin.png"
+        //     onClicked: output.clear()
+        //     background: Rectangle {
+        //         color: "transparent"
+        //     }
+        // }
 
         RowLayout {
             TextField {
@@ -329,11 +324,10 @@ Window {
                 enabled: tcpServer.isConnected && input.text != "" ? true : false
                 onClicked: {
                     tcpServer.send(input.text);
-                    // output.append(addTime("Sent: " + input.text));
                     output.append({
                         msg: input.text,
                         time: getTime(),
-                        owner: "system"
+                        owner: "me"
                     });
                     input.clear();
                 }
