@@ -1,3 +1,3 @@
 # Qt-qml-tcp
 
-<!-- ![aham](/preview.png "Aham app") -->
+![aham](/preview1.png "Aham app")
