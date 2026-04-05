@@ -194,22 +194,17 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            ListModel {
-                id: output
-
-                ListElement {
-                    msg: ""
-                    time: ""
-                    owner: ""
-                }
-            }
-
             Component {
                 id: systemMsgComp
 
                 Row {
+                    anchors.right: parent.right
+                    // Layout.fillWidth: true
+                    // justifyContent: FlexboxLayout.JustifyEnd
+                    // alignItems: FlexboxLayout.AlignEnd
+
                     TextField {
-                        text: msg
+                        text: _msg
                         font.pixelSize: 16
                         readOnly: true
                         background: Rectangle {
@@ -217,7 +212,7 @@ Window {
                         }
                     }
                     TextField {
-                        text: time
+                        text: _time
                         font.pixelSize: 12
                         readOnly: true
                         background: Rectangle {
@@ -231,7 +226,7 @@ Window {
 
                 Row {
                     TextField {
-                        text: msg
+                        text: _msg
                         font.pixelSize: 16
                         readOnly: true
                         background: Rectangle {
@@ -239,7 +234,7 @@ Window {
                         }
                     }
                     TextField {
-                        text: time
+                        text: _time
                         font.pixelSize: 12
                         readOnly: true
                         background: Rectangle {
@@ -253,7 +248,7 @@ Window {
 
                 Row {
                     TextField {
-                        text: msg
+                        text: _msg
                         font.pixelSize: 16
                         readOnly: true
                         background: Rectangle {
@@ -261,7 +256,7 @@ Window {
                         }
                     }
                     TextField {
-                        text: time
+                        text: _time
                         font.pixelSize: 12
                         readOnly: true
                         background: Rectangle {
@@ -271,23 +266,29 @@ Window {
                 }
             }
 
-            Component {
-                id: msgDelegate
+            ListModel {
+                id: output
+                onCountChanged: msgList.positionViewAtEnd()
 
-                Loader {
-                    property string msg: msg
-                    property string time: time
-
-                    sourceComponent: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
-                    onSourceChanged: console.log("source changed")
+                ListElement {
+                    msg: "Some Message"
+                    time: "Some time"
+                    owner: "Some owner"
                 }
             }
 
             ListView {
+                id: msgList
                 anchors.fill: parent
                 model: output
-                delegate: msgDelegate
-                // delegate: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
+                delegate: Component {
+                    Loader {
+                        id: msgLoader
+                        property string _msg: msg
+                        property string _time: time
+                        sourceComponent: owner == "system" ? systemMsgComp : owner == "me" ? myMsgComp : othersMsgComp
+                    }
+                }
             }
 
             Button {
