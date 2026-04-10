@@ -25,7 +25,11 @@ qt_add_qml_module(appaham
 qt_add_resources(appaham "images"
     PREFIX "/"
     FILES
-        bin.png
+        res/images/ic_bin.png
+        res/images/ic_start.png
+        res/images/ic_stop.png
+        res/images/ic_connect.png
+        res/images/ic_send.png
 )
 
 # qt_add_qml_module(TCPServer 

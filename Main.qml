@@ -1,21 +1,22 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Controls.Universal
+import QtQuick.Controls.Material
 import TCPServer
 
 Window {
     id: window
-    width: 640
-    height: 400
+    // width: 240
+    // height: 460
     visible: true
     title: qsTr("Hello World")
     color: "#11111b"
 
-    Universal.theme: Universal.Dark
-    Universal.background: "#1e1e2e"
-    Universal.foreground: "#cdd6f4"
-    Universal.accent: "#b4befe"
+    Material.theme: Material.System
+    Material.accent: "#b4befe"
+    Material.foreground: "#cdd6f4"
+    Material.background: "#1e1e2e"
+    // Material.roundedScale: Material.NotRounded
 
     TCPServer {
         id: tcpServer
@@ -52,15 +53,14 @@ Window {
             rightPadding: 16
             bottomPadding: 8
             font.pixelSize: 16
-            Universal.foreground: "#11111b"
+            Material.foreground: "#11111b"
+            Material.background: "#f38ba8"
+            Material.roundedScale: Material.FullScale
+            display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+            icon.source: "qrc:/res/images/ic_stop.png"
             text: "Stop"
             onClicked: {
                 tcpServer.stop();
-            }
-            background: Rectangle {
-                border.width: 2
-                radius: 8
-                color: "#f38ba8"
             }
         }
     }
@@ -69,41 +69,29 @@ Window {
         id: stoppedActions
 
         RowLayout {
-            Button {
+            RoundButton {
                 id: connectBtn
-                topPadding: 8
-                leftPadding: 16
-                rightPadding: 16
-                bottomPadding: 8
                 font.pixelSize: 16
-                Universal.foreground: "#11111b"
+                Material.foreground: "#11111b"
+                Material.background: "#a6e3a1"
+                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                icon.source: "qrc:/res/images/ic_connect.png"
                 text: "Connect"
                 onClicked: {
                     tcpServer.connect("localhost", parseInt(port.text));
-                }
-                background: Rectangle {
-                    border.width: 2
-                    radius: 8
-                    color: "#a6e3a1"
                 }
             }
 
             Button {
                 id: startBtn
-                topPadding: 8
-                leftPadding: 16
-                rightPadding: 16
-                bottomPadding: 8
                 font.pixelSize: 16
-                Universal.foreground: "#11111b"
+                Material.foreground: "#11111b"
+                Material.background: "#a6e3a1"
+                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                icon.source: "qrc:/res/images/ic_start.png"
                 text: "Start"
                 onClicked: {
                     tcpServer.start("localhost", parseInt(port.text));
-                }
-                background: Rectangle {
-                    border.width: 2
-                    radius: 8
-                    color: "#a6e3a1"
                 }
             }
         }
@@ -115,22 +103,15 @@ Window {
         RowLayout {
             Button {
                 id: disconnectBtn
-                topPadding: 8
-                leftPadding: 16
-                rightPadding: 16
-                bottomPadding: 8
                 font.pixelSize: 16
-                Universal.foreground: "#11111b"
+                Material.foreground: "#11111b"
+                Material.background: "#f38ba8"
+                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                icon.source: "qrc:/res/images/ic_connect.png"
                 text: "Disconnect"
                 enabled: tcpServer.isConnected
                 onClicked: {
                     tcpServer.disconnect();
-                }
-                background: Rectangle {
-                    border.width: 2
-                    radius: 8
-                    opacity: tcpServer.isConnected ? 1 : 0.5
-                    color: "#f38ba8"
                 }
             }
 
@@ -141,9 +122,15 @@ Window {
     }
 
     ColumnLayout {
-        anchors.fill: parent
         spacing: 8
-        anchors.margins: 8
+        anchors {
+            fill: parent
+
+            topMargin: parent.SafeArea.margins.top + 8
+            leftMargin: parent.SafeArea.margins.left + 8
+            rightMargin: parent.SafeArea.margins.right + 8
+            bottomMargin: parent.SafeArea.margins.bottom + 8
+        }
 
         FlexboxLayout {
             Layout.fillHeight: false
@@ -162,7 +149,7 @@ Window {
 
                 Text {
                     id: state
-                    text: tcpServer.isConnected ? "Connected" : tcpServer.isListening ? "Listening" : "Disconnected"
+                    text: window.width <= 400 ? "•" : tcpServer.isConnected ? "Connected" : tcpServer.isListening ? "Listening" : "Disconnected"
                     font.weight: 500
                     font.pixelSize: 20
                     color: tcpServer.isConnected ? "#a6e3a1" : tcpServer.isListening ? "#b4befe" : "#f38ba8"
@@ -172,17 +159,13 @@ Window {
             RowLayout {
                 TextField {
                     id: port
-                    implicitHeight: parent.height
+                    // implicitHeight: parent.height
                     implicitWidth: 76
                     font.pixelSize: 16
                     text: "1234"
                     validator: IntValidator {}
+                    placeholderText: qsTr("Port")
                     enabled: !tcpServer.isListening && !tcpServer.isConnected
-                    background: Rectangle {
-                        border.width: 2
-                        radius: 8
-                        color: "#1e1e2e"
-                    }
                 }
 
                 Loader {
@@ -210,6 +193,7 @@ Window {
                 }
             }
         }
+
         Component {
             id: myMsgComp
 
@@ -238,6 +222,7 @@ Window {
                 }
             }
         }
+
         Component {
             id: othersMsgComp
 
@@ -277,7 +262,6 @@ Window {
             model: output
             Layout.fillWidth: true
             Layout.fillHeight: true
-            layoutDirection: Qt.RightToLeft
             spacing: 8
             delegate: Loader {
                 id: msgLoader
@@ -291,7 +275,7 @@ Window {
         //     x: parent.width - 40
         //     y: 8
         //     icon.color: "#f38ba8"
-        //     icon.source: "qrc:/bin.png"
+        //     icon.source: "qrc:/res/images/bin.png"
         //     onClicked: output.clear()
         //     background: Rectangle {
         //         color: "transparent"
@@ -303,23 +287,18 @@ Window {
                 id: input
                 implicitHeight: sendBtn.height
                 Layout.fillWidth: true
+                Material.roundedScale: Material.FullScale
                 font.pixelSize: 16
-                placeholderText: qsTr("Enter something")
-                background: Rectangle {
-                    border.width: 2
-                    radius: 8
-                    color: "#1e1e2e"
-                }
+                placeholderText: qsTr("Enter your message")
             }
 
             Button {
                 id: sendBtn
-                topPadding: 8
-                leftPadding: 16
-                rightPadding: 16
-                bottomPadding: 8
                 font.pixelSize: 16
-                Universal.foreground: "#11111b"
+                Material.foreground: "#11111b"
+                Material.background: "#89b4fa"
+                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                icon.source: "qrc:/res/images/ic_send.png"
                 text: "Send"
                 enabled: tcpServer.isConnected && input.text != "" ? true : false
                 onClicked: {
@@ -330,12 +309,6 @@ Window {
                         owner: "me"
                     });
                     input.clear();
-                }
-                background: Rectangle {
-                    border.width: 2
-                    radius: 8
-                    opacity: parent.enabled ? 1 : 0.5
-                    color: "#89b4fa"
                 }
             }
         }
