@@ -1,7 +1,7 @@
+import QtCore
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Controls.Material
 import TCPServer
 
 Window {
@@ -12,11 +12,13 @@ Window {
     title: qsTr("Hello World")
     color: "#11111b"
 
-    Material.theme: Material.System
-    Material.accent: "#b4befe"
-    Material.foreground: "#cdd6f4"
-    Material.background: "#1e1e2e"
-    // Material.roundedScale: Material.NotRounded
+    readonly property string displaySize: width <= 480 ? "small" : width <= 768 ? "medium" : "large"
+    property string host: "localhost"
+    property int port: 1234
+
+    Settings {
+        property alias port: window.port
+    }
 
     TCPServer {
         id: tcpServer
@@ -46,21 +48,20 @@ Window {
     Component {
         id: stopBtnComp
 
-        Button {
+        RoundButton {
             id: stopBtn
-            topPadding: 8
-            leftPadding: 16
-            rightPadding: 16
-            bottomPadding: 8
+            padding: 8
             font.pixelSize: 16
-            Material.foreground: "#11111b"
-            Material.background: "#f38ba8"
-            Material.roundedScale: Material.FullScale
-            display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+            display: AbstractButton.IconOnly
             icon.source: "qrc:/res/images/ic_stop.png"
-            text: "Stop"
+            icon.color: "#f38ba8"
             onClicked: {
                 tcpServer.stop();
+            }
+            opacity: enabled ? 1.0 : 0.3
+            background: Rectangle {
+                color: parent.hovered ? "#1affffff" : "transparent"
+                radius: 16
             }
         }
     }
@@ -71,27 +72,34 @@ Window {
         RowLayout {
             RoundButton {
                 id: connectBtn
+                padding: 8
                 font.pixelSize: 16
-                Material.foreground: "#11111b"
-                Material.background: "#a6e3a1"
-                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                display: AbstractButton.IconOnly
                 icon.source: "qrc:/res/images/ic_connect.png"
-                text: "Connect"
+                icon.color: "#a6e3a1"
                 onClicked: {
-                    tcpServer.connect("localhost", parseInt(port.text));
+                    tcpServer.connect("localhost", port);
+                }
+                opacity: enabled ? 1.0 : 0.3
+                background: Rectangle {
+                    color: parent.hovered ? "#1affffff" : "transparent"
+                    radius: 16
                 }
             }
 
-            Button {
+            RoundButton {
                 id: startBtn
                 font.pixelSize: 16
-                Material.foreground: "#11111b"
-                Material.background: "#a6e3a1"
-                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                display: AbstractButton.IconOnly
                 icon.source: "qrc:/res/images/ic_start.png"
-                text: "Start"
+                icon.color: "#a6e3a1"
                 onClicked: {
-                    tcpServer.start("localhost", parseInt(port.text));
+                    tcpServer.start("localhost", port);
+                }
+                opacity: enabled ? 1.0 : 0.3
+                background: Rectangle {
+                    color: parent.hovered ? "#1affffff" : "transparent"
+                    radius: 16
                 }
             }
         }
@@ -101,17 +109,21 @@ Window {
         id: startedActions
 
         RowLayout {
-            Button {
+            RoundButton {
                 id: disconnectBtn
+                padding: 8
                 font.pixelSize: 16
-                Material.foreground: "#11111b"
-                Material.background: "#f38ba8"
-                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                display: AbstractButton.IconOnly
                 icon.source: "qrc:/res/images/ic_connect.png"
-                text: "Disconnect"
+                icon.color: "#a6e3a1"
                 enabled: tcpServer.isConnected
                 onClicked: {
                     tcpServer.disconnect();
+                }
+                opacity: enabled ? 1.0 : 0.3
+                background: Rectangle {
+                    color: parent.hovered ? "#1affffff" : "transparent"
+                    radius: 16
                 }
             }
 
@@ -126,10 +138,53 @@ Window {
         anchors {
             fill: parent
 
-            topMargin: parent.SafeArea.margins.top + 8
-            leftMargin: parent.SafeArea.margins.left + 8
-            rightMargin: parent.SafeArea.margins.right + 8
-            bottomMargin: parent.SafeArea.margins.bottom + 8
+            topMargin: parent.SafeArea.margins.top + spacing
+            leftMargin: parent.SafeArea.margins.left + spacing
+            rightMargin: parent.SafeArea.margins.right + spacing
+            bottomMargin: parent.SafeArea.margins.bottom + spacing
+        }
+
+        Popup {
+            id: settingsPopup
+            anchors.centerIn: parent
+
+            ColumnLayout {
+                TextField {
+                    id: host
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
+                    implicitHeight: sendBtn.height
+                    Layout.fillWidth: true
+                    font.pixelSize: 16
+                    text: window.host
+                    color: "#cdd6f4"
+
+                    background: Rectangle {
+                        color: "#1e1e2e"
+                        radius: 999
+                    }
+                }
+
+                TextField {
+                    id: port
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
+                    implicitHeight: sendBtn.height
+                    Layout.fillWidth: true
+                    font.pixelSize: 16
+                    text: window.port
+                    color: "#cdd6f4"
+
+                    background: Rectangle {
+                        color: "#1e1e2e"
+                        radius: 999
+                    }
+                }
+            }
         }
 
         FlexboxLayout {
@@ -149,7 +204,7 @@ Window {
 
                 Text {
                     id: state
-                    text: window.width <= 400 ? "•" : tcpServer.isConnected ? "Connected" : tcpServer.isListening ? "Listening" : "Disconnected"
+                    text: "•"
                     font.weight: 500
                     font.pixelSize: 20
                     color: tcpServer.isConnected ? "#a6e3a1" : tcpServer.isListening ? "#b4befe" : "#f38ba8"
@@ -157,19 +212,25 @@ Window {
             }
 
             RowLayout {
-                TextField {
-                    id: port
-                    // implicitHeight: parent.height
-                    implicitWidth: 76
-                    font.pixelSize: 16
-                    text: "1234"
-                    validator: IntValidator {}
-                    placeholderText: qsTr("Port")
-                    enabled: !tcpServer.isListening && !tcpServer.isConnected
-                }
-
                 Loader {
                     sourceComponent: tcpServer.isListening || tcpServer.isConnected ? startedActions : stoppedActions
+                }
+
+                RoundButton {
+                    id: settingsBtn
+                    padding: 8
+                    font.pixelSize: 16
+                    display: AbstractButton.IconOnly
+                    icon.source: "qrc:/res/images/ic_settings.png"
+                    icon.color: "#b4befe"
+                    onClicked: {
+                        settingsPopup.visible = true;
+                    }
+                    opacity: enabled ? 1.0 : 0.3
+                    background: Rectangle {
+                        color: parent.hovered ? "#1affffff" : "transparent"
+                        radius: 16
+                    }
                 }
             }
         }
@@ -183,11 +244,15 @@ Window {
 
                 TextField {
                     text: _msg
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
                     font.pixelSize: 16
                     readOnly: true
                     color: "#cdd6f4"
                     background: Rectangle {
-                        radius: 8
+                        radius: 16
                         color: "#1e1e2e"
                     }
                 }
@@ -203,6 +268,10 @@ Window {
 
                 TextField {
                     text: _msg
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
                     font.pixelSize: 16
                     readOnly: true
                     color: "#cdd6f4"
@@ -214,8 +283,13 @@ Window {
 
                 TextField {
                     text: _time
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
                     font.pixelSize: 12
                     readOnly: true
+                    color: "#cdd6f4"
                     background: Rectangle {
                         color: "transparent"
                     }
@@ -232,6 +306,10 @@ Window {
 
                 TextField {
                     text: _msg
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
                     font.pixelSize: 16
                     readOnly: true
                     color: "#cdd6f4"
@@ -243,8 +321,13 @@ Window {
 
                 TextField {
                     text: _time
+                    topPadding: 8
+                    rightPadding: 16
+                    bottomPadding: 8
+                    leftPadding: 16
                     font.pixelSize: 12
                     readOnly: true
+                    color: "#cdd6f4"
                     background: Rectangle {
                         color: "transparent"
                     }
@@ -271,7 +354,7 @@ Window {
             }
         }
 
-        // Button {
+        // RoundButton {
         //     x: parent.width - 40
         //     y: 8
         //     icon.color: "#f38ba8"
@@ -285,21 +368,29 @@ Window {
         RowLayout {
             TextField {
                 id: input
+                topPadding: 8
+                rightPadding: 16
+                bottomPadding: 8
+                leftPadding: 16
                 implicitHeight: sendBtn.height
                 Layout.fillWidth: true
-                Material.roundedScale: Material.FullScale
                 font.pixelSize: 16
                 placeholderText: qsTr("Enter your message")
+                color: "#cdd6f4"
+                placeholderTextColor: "#cdd6f4"
+
+                background: Rectangle {
+                    color: "#1e1e2e"
+                    radius: 999
+                }
             }
 
-            Button {
+            RoundButton {
                 id: sendBtn
+                padding: 8
                 font.pixelSize: 16
-                Material.foreground: "#11111b"
-                Material.background: "#89b4fa"
-                display: window.width <= 400 ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
+                display: AbstractButton.IconOnly
                 icon.source: "qrc:/res/images/ic_send.png"
-                text: "Send"
                 enabled: tcpServer.isConnected && input.text != "" ? true : false
                 onClicked: {
                     tcpServer.send(input.text);
@@ -309,6 +400,12 @@ Window {
                         owner: "me"
                     });
                     input.clear();
+                }
+                opacity: enabled ? 1.0 : 0.3
+                background: Rectangle {
+                    color: "#a6e3a1"
+                    radius: 999
+                    opacity: enabled ? 1.0 : 0.3
                 }
             }
         }

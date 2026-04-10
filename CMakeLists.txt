@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(aham
+project(appAham
     VERSION 0.1
     LANGUAGES CXX
 )
@@ -11,18 +11,18 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.10)
 
-qt_add_executable(appaham
+qt_add_executable(appAham
     main.cpp
     tcpServer.cpp
     tcpServer.h
 )
 
-qt_add_qml_module(appaham
-    URI aham
+qt_add_qml_module(appAham
+    URI Aham
     QML_FILES Main.qml 
 )
 
-qt_add_resources(appaham "images"
+qt_add_resources(appAham "images"
     PREFIX "/"
     FILES
         res/images/ic_bin.png
@@ -30,29 +30,30 @@ qt_add_resources(appaham "images"
         res/images/ic_stop.png
         res/images/ic_connect.png
         res/images/ic_send.png
+        res/images/ic_settings.png
 )
-
-# qt_add_qml_module(TCPServer 
-#     URI TCPServer
-#     SOURCES tcpServer.cpp tcpServer.h
-# )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1. If
 # you are developing for iOS or macOS you should consider setting an explicit,
 # fixed bundle identifier manually though.
-set_target_properties(appaham
+set_target_properties(appAham
     PROPERTIES # MACOSX_BUNDLE_GUI_IDENTIFIER com.example.apprc_remote
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING
     ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
+
+    QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/android
+    QT_ANDROID_PACKAGE_NAME "com.github.mrnmoy"
+    QT_ANDROID_APP_NAME "Aham"
+    QT_ANDROID_APP_ICON "@mipmap/ic_launcher"
 )
 
-target_link_libraries(appaham PRIVATE Qt6::Quick)
+target_link_libraries(appAham PRIVATE Qt6::Quick)
 
 install(
-    TARGETS appaham
+    TARGETS appAham
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
