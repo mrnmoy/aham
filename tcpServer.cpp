@@ -1,8 +1,8 @@
 #include "tcpServer.h"
 
 TCPServer::TCPServer() : QObject(), m_nNextBlockSize(0) {
-  serverStatus = false;
-  clientStatus = false;
+  _serverStatus = false;
+  _clientStatus = false;
   tcpServer = new QTcpServer();
 }
 
@@ -16,8 +16,8 @@ bool TCPServer::start(QString host, int port) {
   QObject::connect(tcpServer, &QTcpServer::newConnection, this,
                    &TCPServer::connected);
 
-  serverStatus = true;
-  emit serverStatusChanged(serverStatus);
+  _serverStatus = true;
+  emit serverStatusChanged(_serverStatus);
   return true;
 }
 
@@ -27,12 +27,12 @@ void TCPServer::stop() {
                         &TCPServer::connected);
 
     // QList<QTcpSocket *> tcpClients = server->getClients();
-    if (clientStatus)
+    if (_clientStatus)
       disconnect();
 
     tcpServer->close();
-    serverStatus = false;
-    emit serverStatusChanged(serverStatus);
+    _serverStatus = false;
+    emit serverStatusChanged(_serverStatus);
   }
 }
 
@@ -73,7 +73,7 @@ void TCPServer::timeout() {
 }
 
 void TCPServer::connected() {
-  if (getServerStatus()) {
+  if (serverStatus()) {
     tcpSocket = tcpServer->nextPendingConnection();
     tcpServer->pauseAccepting();
 
@@ -83,21 +83,25 @@ void TCPServer::connected() {
                      &TCPServer::disconnected);
   }
 
-  clientStatus = true;
-  emit clientStatusChanged(clientStatus);
+  _clientStatus = true;
+  emit clientStatusChanged(_clientStatus);
 }
 
 void TCPServer::disconnected() {
   // QObject::disconnect(tcpSocket, &QTcpSocket::disconnected, 0, 0);
-  if (getServerStatus())
+  if (serverStatus())
     tcpServer->resumeAccepting();
 
-  clientStatus = false;
-  emit clientStatusChanged(clientStatus);
+  _clientStatus = false;
+  emit clientStatusChanged(_clientStatus);
 }
 
-bool TCPServer::getServerStatus() { return serverStatus; }
-bool TCPServer::getClientStatus() { return clientStatus; }
+bool TCPServer::serverStatus() { return _serverStatus; }
+bool TCPServer::clientStatus() { return _clientStatus; }
+
+QString TCPServer::getServerAddress() {
+  return tcpServer->serverAddress().toString();
+};
 
 void TCPServer::readyRead() {
   QDataStream in(tcpSocket);

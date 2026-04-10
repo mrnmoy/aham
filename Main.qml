@@ -46,27 +46,6 @@ Window {
     }
 
     Component {
-        id: stopBtnComp
-
-        RoundButton {
-            id: stopBtn
-            padding: 8
-            font.pixelSize: 16
-            display: AbstractButton.IconOnly
-            icon.source: "qrc:/res/images/ic_stop.png"
-            icon.color: "#f38ba8"
-            onClicked: {
-                tcpServer.stop();
-            }
-            opacity: enabled ? 1.0 : 0.3
-            background: Rectangle {
-                color: parent.hovered ? "#1affffff" : "transparent"
-                radius: 16
-            }
-        }
-    }
-
-    Component {
         id: stoppedActions
 
         RowLayout {
@@ -95,6 +74,7 @@ Window {
                 icon.color: "#a6e3a1"
                 onClicked: {
                     tcpServer.start(window.host, window.port);
+                    console.log(tcpServer.getServerAddress());
                 }
                 opacity: enabled ? 1.0 : 0.3
                 background: Rectangle {
@@ -115,7 +95,7 @@ Window {
                 font.pixelSize: 16
                 display: AbstractButton.IconOnly
                 icon.source: "qrc:/res/images/ic_connect.png"
-                icon.color: "#a6e3a1"
+                icon.color: "#f38ba8"
                 enabled: tcpServer.isConnected
                 onClicked: {
                     tcpServer.disconnect();
@@ -127,8 +107,22 @@ Window {
                 }
             }
 
-            Loader {
-                sourceComponent: tcpServer.isListening ? stopBtnComp : undefined
+            RoundButton {
+                id: stopBtn
+                padding: 8
+                font.pixelSize: 16
+                display: AbstractButton.IconOnly
+                icon.source: "qrc:/res/images/ic_stop.png"
+                icon.color: "#f38ba8"
+                onClicked: {
+                    tcpServer.stop();
+                }
+                enabled: tcpServer.isListening
+                opacity: enabled ? 1.0 : 0.3
+                background: Rectangle {
+                    color: parent.hovered ? "#1affffff" : "transparent"
+                    radius: 16
+                }
             }
         }
     }
@@ -146,7 +140,13 @@ Window {
 
         Popup {
             id: settingsPopup
-            anchors.centerIn: parent
+            implicitWidth: parent.width / 2
+            implicitHeight: parent.height / 2
+
+            background: Rectangle {
+                color: "#181825"
+                radius: 16
+            }
 
             ColumnLayout {
                 TextField {
@@ -160,9 +160,6 @@ Window {
                     font.pixelSize: 16
                     text: window.host
                     color: "#cdd6f4"
-                    onTextChanged: {
-                        window.host = parseInt(text);
-                    }
                     background: Rectangle {
                         color: "#1e1e2e"
                         radius: 999
