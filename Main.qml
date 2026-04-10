@@ -78,7 +78,7 @@ Window {
                 icon.source: "qrc:/res/images/ic_connect.png"
                 icon.color: "#a6e3a1"
                 onClicked: {
-                    tcpServer.connect("localhost", port);
+                    tcpServer.connect(window.host, window.port);
                 }
                 opacity: enabled ? 1.0 : 0.3
                 background: Rectangle {
@@ -94,7 +94,7 @@ Window {
                 icon.source: "qrc:/res/images/ic_start.png"
                 icon.color: "#a6e3a1"
                 onClicked: {
-                    tcpServer.start("localhost", port);
+                    tcpServer.start(window.host, window.port);
                 }
                 opacity: enabled ? 1.0 : 0.3
                 background: Rectangle {
@@ -160,7 +160,9 @@ Window {
                     font.pixelSize: 16
                     text: window.host
                     color: "#cdd6f4"
-
+                    onTextChanged: {
+                        window.host = parseInt(text);
+                    }
                     background: Rectangle {
                         color: "#1e1e2e"
                         radius: 999
@@ -178,7 +180,9 @@ Window {
                     font.pixelSize: 16
                     text: window.port
                     color: "#cdd6f4"
-
+                    onTextChanged: {
+                        window.port = parseInt(text);
+                    }
                     background: Rectangle {
                         color: "#1e1e2e"
                         radius: 999
@@ -244,15 +248,15 @@ Window {
 
                 TextField {
                     text: _msg
-                    topPadding: 8
-                    rightPadding: 16
-                    bottomPadding: 8
-                    leftPadding: 16
+                    topPadding: 4
+                    rightPadding: 8
+                    bottomPadding: 4
+                    leftPadding: 8
                     font.pixelSize: 16
                     readOnly: true
                     color: "#cdd6f4"
                     background: Rectangle {
-                        radius: 16
+                        radius: 8
                         color: "#1e1e2e"
                     }
                 }
@@ -268,10 +272,10 @@ Window {
 
                 TextField {
                     text: _msg
-                    topPadding: 8
-                    rightPadding: 16
-                    bottomPadding: 8
-                    leftPadding: 16
+                    topPadding: 4
+                    rightPadding: 8
+                    bottomPadding: 4
+                    leftPadding: 8
                     font.pixelSize: 16
                     readOnly: true
                     color: "#cdd6f4"
@@ -283,10 +287,10 @@ Window {
 
                 TextField {
                     text: _time
-                    topPadding: 8
-                    rightPadding: 16
-                    bottomPadding: 8
-                    leftPadding: 16
+                    topPadding: 4
+                    rightPadding: 8
+                    bottomPadding: 4
+                    leftPadding: 8
                     font.pixelSize: 12
                     readOnly: true
                     color: "#cdd6f4"
@@ -306,10 +310,10 @@ Window {
 
                 TextField {
                     text: _msg
-                    topPadding: 8
-                    rightPadding: 16
-                    bottomPadding: 8
-                    leftPadding: 16
+                    topPadding: 4
+                    rightPadding: 8
+                    bottomPadding: 4
+                    leftPadding: 8
                     font.pixelSize: 16
                     readOnly: true
                     color: "#cdd6f4"
@@ -321,10 +325,10 @@ Window {
 
                 TextField {
                     text: _time
-                    topPadding: 8
-                    rightPadding: 16
-                    bottomPadding: 8
-                    leftPadding: 16
+                    topPadding: 4
+                    rightPadding: 8
+                    bottomPadding: 4
+                    leftPadding: 8
                     font.pixelSize: 12
                     readOnly: true
                     color: "#cdd6f4"
@@ -378,7 +382,7 @@ Window {
                 placeholderText: qsTr("Enter your message")
                 color: "#cdd6f4"
                 placeholderTextColor: "#cdd6f4"
-
+                onAccepted: onSend()
                 background: Rectangle {
                     color: "#1e1e2e"
                     radius: 999
@@ -392,15 +396,7 @@ Window {
                 display: AbstractButton.IconOnly
                 icon.source: "qrc:/res/images/ic_send.png"
                 enabled: tcpServer.isConnected && input.text != "" ? true : false
-                onClicked: {
-                    tcpServer.send(input.text);
-                    output.append({
-                        msg: input.text,
-                        time: getTime(),
-                        owner: "me"
-                    });
-                    input.clear();
-                }
+                onClicked: onSend()
                 opacity: enabled ? 1.0 : 0.3
                 background: Rectangle {
                     color: "#a6e3a1"
@@ -417,6 +413,16 @@ Window {
             time: getTime(),
             owner: "system"
         });
+    }
+
+    function onSend() {
+        tcpServer.send(input.text);
+        output.append({
+            msg: input.text,
+            time: getTime(),
+            owner: "me"
+        });
+        input.clear();
     }
 
     function getTime() {
